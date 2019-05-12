@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  hotel-api:
+    build:
+      context: ./hotel-api
+    environment:
+      - TRACING_URL=http://tracing:14268/api/traces
+
+  weather-api:
+    build:
+      context: ./weather-api
+    environment:
+      - TRACING_URL=http://tracing:14268/api/traces
+
+  reservation-api:
+    build:
+      context: ./reservation-api
+    environment:
+      # - HOTELS_URL="http://hotel-api:8082/v1/weather?city="
+      - HOTELS_URL=https://test.api.amadeus.com/v2/shopping/hotel-offers?adults=1&radius=5&radiusUnit=KM&paymentPolicy=NONE&includeClosed=false&bestRateOnly=true&view=FULL&sort=PRICE&cityCode=
+      - WEATHER_URL=http://localhost:8082/v1/weather?city=
+      - TRACING_URL=http://tracing:14268/api/traces
+    ports:
+      - "0.0.0.0:8080:8080"
+
+  tracing:
+    image: jaegertracing/all-in-one:1.11
+    ports:
+      - "0.0.0.0:16686:16686"
