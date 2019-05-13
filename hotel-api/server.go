@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
-	"go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/plugin/ochttp/propagation/b3"
+	"contrib.go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 )
 
@@ -18,6 +19,7 @@ type Hotel struct {
 
 func getHotels(ctx context.Context, city string) []Hotel {
 	_, span := trace.StartSpan(ctx, "getHotels")
+	span.AddAttributes(trace.StringAttribute("city", city))
 
 	defer span.End()
 	if city == "Vegas" {
@@ -37,17 +39,7 @@ func getHotels(ctx context.Context, city string) []Hotel {
 }
 
 func handleHotelsRequest(w http.ResponseWriter, r *http.Request) {
-	f := &b3.HTTPFormat{}
-	var span *trace.Span
-	var ctx context.Context
-	spanCtx, ok := f.SpanContextFromRequest(r)
-	time.Sleep(time.Millisecond * 90)
-
-	if ok {
-		ctx, span = trace.StartSpanWithRemoteParent(context.Background(), "handleHotelsRequest", spanCtx)
-	} else {
-		ctx, span = trace.StartSpan(context.Background(), "handleHotelsRequest")
-	}
+	ctx, span := trace.StartSpan(r.Context(), "handleHotelsRequest")
 
 	defer span.End()
 	city := r.FormValue("city")
@@ -65,7 +57,7 @@ func main() {
 	// Register the Jaeger exporter to be able to retrieve
 	// the collected spans.
 	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: "http://localhost:14268",
+		CollectorEndpoint: os.Getenv("TRACING_URL"),
 		Process: jaeger.Process{
 			ServiceName: "hotel-api",
 		},
@@ -81,5 +73,5 @@ func main() {
 	// probability.
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	http.HandleFunc("/v1/hotels", handleHotelsRequest)
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	log.Fatal(http.ListenAndServe(":8081", &ochttp.Handler{}))
 }

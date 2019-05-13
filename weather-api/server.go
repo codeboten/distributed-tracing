@@ -3,29 +3,59 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
-	"time"
+	"os"
 
-	"go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/jaeger"
+	owm "github.com/briandowns/openweathermap"
+	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
 	"go.opencensus.io/trace"
 )
 
 type WeatherReport struct {
-	Temperature float64
+	Temperature int
 	Condition   string
+	Error       string
+}
+
+func getErrorMessage(ctx context.Context, err error) string {
+	_, span := trace.StartSpan(ctx, "getWeather")
+	span.AddAttributes(trace.StringAttribute("error", err.Error()))
+	defer span.End()
+	return err.Error()
 }
 
 func getWeather(ctx context.Context, city string) WeatherReport {
+	var apiKey = os.Getenv("OWM_API_KEY")
 	_, span := trace.StartSpan(ctx, "getWeather")
-	time.Sleep(time.Millisecond * 50)
-
 	defer span.End()
 
+	w, err := owm.NewCurrent("C", "en", apiKey)
+
+	if err != nil {
+		return WeatherReport{
+			Temperature: 0,
+			Condition:   "unavailable",
+			Error:       getErrorMessage(ctx, err),
+		}
+	}
+
+	w.CurrentByName(city)
+	if len(w.Weather) == 0 {
+		return WeatherReport{
+			Temperature: 0,
+			Condition:   "unavailable",
+			Error:       getErrorMessage(ctx, errors.New("City not found")),
+		}
+	}
+
+	span.AddAttributes(trace.StringAttribute("weather", w.Weather[0].Description))
 	return WeatherReport{
-		Temperature: -9.1,
-		Condition:   "sunny",
+		Temperature: w.Dt,
+		Condition:   w.Weather[0].Description,
 	}
 }
 
@@ -36,17 +66,12 @@ func handleWeatherRequest(w http.ResponseWriter, r *http.Request) {
 	spanCtx, ok := f.SpanContextFromRequest(r)
 
 	if ok {
-		ctx, span = trace.StartSpanWithRemoteParent(context.Background(), "handleWeatherRequest", spanCtx)
+		ctx, span = trace.StartSpanWithRemoteParent(r.Context(), "handleWeatherRequest", spanCtx)
 	} else {
-		ctx, span = trace.StartSpan(context.Background(), "handleWeatherRequest")
+		ctx, span = trace.StartSpan(r.Context(), "handleWeatherRequest")
 	}
 
 	defer span.End()
-	// lookup travel advisories
-	// get a quote for the trip
-	// find a list of hotels
-	// get weather report for the dates
-	// city := "Whistler"
 	city := r.FormValue("city")
 	span.AddAttributes(trace.StringAttribute("city", city))
 	json.NewEncoder(w).Encode(getWeather(ctx, city))
@@ -56,7 +81,7 @@ func main() {
 	// Register the Jaeger exporter to be able to retrieve
 	// the collected spans.
 	exporter, err := jaeger.NewExporter(jaeger.Options{
-		Endpoint: "http://localhost:14268",
+		CollectorEndpoint: os.Getenv("TRACING_URL"),
 		Process: jaeger.Process{
 			ServiceName: "weather-api",
 		},
@@ -72,5 +97,5 @@ func main() {
 	// probability.
 	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
 	http.HandleFunc("/v1/weather", handleWeatherRequest)
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	log.Fatal(http.ListenAndServe(":8082", &ochttp.Handler{}))
 }
