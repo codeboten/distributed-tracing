@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "1ae63ee4-e52e-4a2a-a014-37a5eefba92c",
+		"name": "Reservation API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Paris",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/v1/reservation?city=Paris",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "Paris"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Las Vegas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/v1/reservation?city=Vegas",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "Vegas"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vancouver",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/v1/reservation?city=Vancouver",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "Vancouver"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "No City",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/v1/reservation",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ErrorLand",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/v1/reservation?city=ErrorLand",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"reservation"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "ErrorLand"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

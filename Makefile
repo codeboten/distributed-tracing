@@ -24,3 +24,6 @@ demo:
 
 clean: clean-reservation-api clean-hotel-api clean-weather-api
 	@docker rm -f jaeger | true
+
+test:
+	newman run -n 5 ./tests/reservation-api-collection.json
