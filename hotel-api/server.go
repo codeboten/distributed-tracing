@@ -17,13 +17,23 @@ type Hotel struct {
 	Name string
 }
 
+func thisWasHereAndWeDontKnowWhy(ctx context.Context, city string) {
+	_, span := trace.StartSpan(ctx, "thisWasHereAndWeDontKnowWhy")
+	span.AddAttributes(trace.StringAttribute("city", city))
+	defer span.End()
+}
+
 func getHotels(ctx context.Context, city string) []Hotel {
 	_, span := trace.StartSpan(ctx, "getHotels")
 	span.AddAttributes(trace.StringAttribute("city", city))
 
 	defer span.End()
 	if city == "Vegas" {
-		time.Sleep(time.Second * 5)
+		for i := 0; i < 5; i++ {
+			time.Sleep(time.Millisecond * 250)
+			thisWasHereAndWeDontKnowWhy(ctx, city)
+		}
+
 		return []Hotel{
 			Hotel{Name: "Bellagio"},
 			Hotel{Name: "MGM Grand"},

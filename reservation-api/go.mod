@@ -9,6 +9,7 @@ require (
 	github.com/facebookgo/muster v0.0.0-20150708232844-fd3d7953fd52 // indirect
 	github.com/honeycombio/libhoney-go v1.10.0 // indirect
 	github.com/honeycombio/opencensus-exporter v0.0.0-20190403204208-80ef45daf64e
+	github.com/mdempsky/gocode v0.0.0-20190203001940-7fb65232883f // indirect
 	go.opencensus.io v0.21.0
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 )

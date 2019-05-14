@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"contrib.go.opencensus.io/exporter/jaeger"
+
 	owm "github.com/briandowns/openweathermap"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/plugin/ochttp/propagation/b3"
@@ -54,8 +55,7 @@ func getWeather(ctx context.Context, city string) WeatherReport {
 
 	span.AddAttributes(trace.StringAttribute("weather", w.Weather[0].Description))
 	return WeatherReport{
-		Temperature: w.Dt,
-		Condition:   w.Weather[0].Description,
+		Condition: w.Weather[0].Description,
 	}
 }
 

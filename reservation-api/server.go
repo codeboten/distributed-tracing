@@ -11,7 +11,7 @@ import (
 	_ "net/http/pprof"
 
 	"contrib.go.opencensus.io/exporter/jaeger"
-	honeycomb "github.com/honeycombio/opencensus-exporter/honeycomb"
+	"github.com/honeycombio/opencensus-exporter/honeycomb"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 )
@@ -95,10 +95,7 @@ func getHotels(ctx context.Context, city string) []Hotel {
 func handleReservationRequest(w http.ResponseWriter, r *http.Request) {
 	ctx, span := trace.StartSpan(r.Context(), "handleReservationRequest")
 	defer span.End()
-	// lookup travel advisories
-	// get a quote for the trip
-	// find a list of hotels
-	// get weather report for the dates
+
 	city := r.FormValue("city")
 	if len(city) == 0 {
 		span.SetStatus(trace.Status{Code: 13, Message: "Invalid city specified"})
@@ -124,12 +121,12 @@ func main() {
 		},
 	})
 
-	honeycombExporter := honeycomb.NewExporter(os.Getenv("HONEYCOMB_KEY"), os.Getenv("HONEYCOMB_DATASET"))
-
 	if err != nil {
 		log.Fatalf("Failed to create the Jaeger exporter: %v", err)
 	}
 	trace.RegisterExporter(exporter)
+
+	honeycombExporter := honeycomb.NewExporter(os.Getenv("HONEYCOMB_KEY"), os.Getenv("HONEYCOMB_DATASET"))
 	trace.RegisterExporter(honeycombExporter)
 
 	// For demoing purposes, always sample. In a production application, you should
